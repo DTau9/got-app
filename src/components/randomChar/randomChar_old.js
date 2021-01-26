@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { Component } from 'react';
 import styled from 'styled-components';
 import gotServices from '../../services/gotServices';
 import Spinner from '../spinner';
 import ErrorMessage from '../errorMessage';
+import PropTypes from 'prop-types';
 
 const RandomBlock = ({ className, children }) => (
 	<div className={className}>
@@ -23,53 +24,24 @@ const StyledRandomBlock = styled(RandomBlock)`
 	}
 `;
 
+
+
 const Term = styled.span`
 	font-weight: bold;
 `;
 
-export default function RandomChar({ interval }) {
-	const getData = new gotServices();
-
-	const [randomCharacter, setRandomCharacter] = useState([]);
-	const [spinner, setSpinnner] = useState(true);
-	const [error, setError] = useState(false);
-
-	useEffect(() => {
-		updateCharacter();
-		let timerId = setInterval(updateCharacter, interval);
-		return () => {
-			clearInterval(timerId)
-		};
-	}, [])
-
-	function updateCharacter() {
-		const id = Math.floor(Math.random() * 140 + 25); // 25-140
-
-		getData.getCharacter(id)
-			.then(data => {
-				setRandomCharacter(data);
-				setSpinnner(false);
-			},
-				(error) => {
-					setError(true);
-					setSpinnner(false);
-				})
+export default class RandomChar extends Component {
+	gotServices = new gotServices();
+	state = {
+		char: {},
+		loading: true,
+		error: false
+	}
+	// новый синтаксис пропсов по-умолчанию
+	static defaultProps = {
+		interval: 3000
 	}
 
-	const showError = error ? <ErrorMessage /> : null;
-	const showSpinner = spinner ? <Spinner /> : null;
-	const content = !(error || spinner) ? <View char={randomCharacter} /> : null;
-
-	return (
-		<>
-			{showError}
-			{showSpinner}
-			{content}
-		</>
-	);
-}
-
-/* 
 
 	componentDidMount() {
 		this.updateCharacter();
@@ -125,7 +97,7 @@ RandomChar.defaultProps = {
 
 RandomChar.propTypes = {
 	interval: PropTypes.number
-}*/
+}
 
 const View = (props) => {
 	const { name, gender, born, died, culture } = props.char;
@@ -153,4 +125,4 @@ const View = (props) => {
 			</ul>
 		</StyledRandomBlock>
 	)
-}; 
+};
